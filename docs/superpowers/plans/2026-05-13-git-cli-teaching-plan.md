@@ -70,11 +70,13 @@ git commit -m "chore: 创建教学模块练习目录"
   - 解释：为什么 `git commit` 不加 `-m` 会进 Vim — 编辑器等待你写提交信息
   - **场景：** 让用户打开 Vim、输入文字、保存退出
 
-- [ ] **Step 7: 命令行技巧**
+- [ ] **Step 7: 命令行技巧 + 盲打挑战**
   - Tab 补全路径
   - ↑ 历史命令
   - Ctrl+C 中断当前命令
   - **练习：** 让用户输入 `cd mod` 按 Tab、用 ↑ 找回之前命令
+  - **盲打挑战：** 创建一个很长名字的目录 `very-long-directory-name-for-practice`，要求用户**只敲前 3-4 个字母**按 Tab 补全进入，不得完整输入目录名
+  - **动态检查：** `pwd` 确认已进入长目录
 
 - [ ] **Step 8: 测验验证**
   - **测验题：** 在 `module-0/` 下创建如下结构：
@@ -161,18 +163,27 @@ git commit -m "feat(module-0): 完成命令行生存手册模块"
   - 回顾刚才的提交：让用户把之前的提交改成约定式格式（用 `--amend` 或重做）
 
 - [ ] **Step 9: 测验验证**
-  - **测验题：** 在 `module-1/` 下：
-    1. 创建一个 Java 项目目录 `java-app/`（不写实际 Java 代码，用 `echo` 模拟）
-    2. 创建 `src/Main.java` 和 `out/Main.class`
-    3. 配置 `.gitignore` 忽略 `*.class` 和 `.idea/`
-    4. 执行 `git add .` 后 `git status` 应显示只有 `src/Main.java`、没有 `out/Main.class`
-    5. 提交，commit message 使用约定式格式
+  - **测验题：** 在 `module-1/` 下（模拟 Java Web 项目结构）：
+    1. 创建如下目录结构：
+       ```
+       java-app/
+       ├── src/
+       │   └── Main.java
+       ├── target/
+       │   └── app.jar
+       └── .idea/
+           └── workspace.xml
+       ```
+    2. 配置 `.gitignore` 忽略 `*.class`、`target/` 目录和 `.idea/` 文件夹
+    3. 执行 `git add .` 后 `git status` 应显示只有 `src/Main.java`
+    4. 提交，commit message 使用约定式格式
 
 - [ ] **Step 10: 深度提问**
   - 提 2-3 个原理性问题：
     1. "如果 `git add` 后再次修改了文件，`git status` 会看到什么状态？（理解 staged 和 unstaged 共存）"
     2. "`.gitignore` 中写 `*.class` 和 `/target/` 有什么区别？（/ 前缀的含义）"
-    3. "为什么不推荐 `git commit -a`？（绕过了暂存区的审阅机会）"
+    3. "如果我把一个本应忽略的文件（如 `app.log`）不小心提交到了仓库，现在才加进 `.gitignore`，它还会被追踪吗？怎么让它真正被忽略？（涉及 `git rm --cached`，高频面试题）"
+    4. "为什么不推荐 `git commit -a`？（绕过了暂存区的审阅机会）"
 
 - [ ] **Step 11: 提交测验产物**
 
@@ -187,7 +198,7 @@ git commit -m "feat(module-1): 完成 Git 起步模块"
 
 **目录：** `module-2/`
 
-**教学目标：** 理解分支即指针，掌握 `branch`/`switch`/`merge`，能解决合并冲突。
+**教学目标：** 理解分支即指针，掌握 `branch`/`switch`/`restore`/`merge`，能解决合并冲突。
 
 - [ ] **Step 1: 概念讲解 — 分支是指针**
   - 分支本质上是指向某次提交的可移动指针
@@ -214,20 +225,28 @@ git commit -m "feat(module-1): 完成 Git 起步模块"
   - `git switch main` 发现 `login.py` 消失了（分支隔离）
   - **动态检查：** `git branch -v` 看每个分支的最新提交
 
-- [ ] **Step 5: 概念讲解 — 合并分支与 fast-forward**
+- [ ] **Step 5: 概念讲解 + 动手 — git restore（撤销修改）**
+  - 精分职责：`git switch` 管分支切换，`git restore` 管文件恢复 ← Git 2.23 的新分工
+  - 场景：改到一半的文件想放弃修改
+  - `git restore <file>`：撤销工作区的未提交修改（文件回到上次提交的状态）
+  - `git restore --staged <file>`：把文件从暂存区移出，但保留工作区改动
+  - **练习：** 修改 `login.py` 加一行乱码 → `git restore login.py` → 文件恢复
+  - 对比旧版 `git checkout -- <file>`，了解即可，优先用 `restore`
+
+- [ ] **Step 6: 概念讲解 — 合并分支与 fast-forward**
   - `git merge feature/login`（切回 main 后）
   - **重点解释 fast-forward：** main 只是把指针向前移动到了 feature/login 的位置，没有产生新提交
   - 这就是"为什么有时候合并没产生新提交记录"
   - 对比：如果 main 也有新提交，fast-forward 不可能，会产生三方合并 + merge commit
 
-- [ ] **Step 6: 动手练习 — 创建三方合并场景**
+- [ ] **Step 7: 动手练习 — 创建三方合并场景**
   - 从当前 main 创建 `feature/payment`，切过去
   - 创建 `payment.py` → `add` → `commit -m "feat: add payment"`
   - 切回 main，创建 `utils.py` → `add` → `commit -m "feat: add utils"`（main 前进了）
   - 此时 `git merge feature/payment` → 自动产生 merge commit（非 fast-forward）
   - `git log --oneline --graph --all` 看分叉再汇合的线条
 
-- [ ] **Step 7: 场景化模拟 — 冲突解决**
+- [ ] **Step 8: 场景化模拟 — 冲突解决**
   - 刻意制造冲突：
     - main 分支上 `echo "main version" > conflict.txt` → `add` → `commit`
     - `git switch -c feature/conflict`（创建并切换）
@@ -240,7 +259,7 @@ git commit -m "feat(module-1): 完成 Git 起步模块"
     - 手动编辑保留正确内容 → 删除冲突标记 → `add` → `commit`
   - **验证：** `git log --oneline --graph --all` 确认冲突已解决
 
-- [ ] **Step 8: 测验验证**
+- [ ] **Step 9: 测验验证**
   - **测验题：** 在 `module-2/` 下：
     1. 从 `main` 创建分支 `feat/dashboard`
     2. 在 `feat/dashboard` 上提交两个改动
@@ -249,13 +268,13 @@ git commit -m "feat(module-1): 完成 Git 起步模块"
     5. 执行 `git log --oneline --graph --all` 观察历史形状
     6. 解释：这次合并是 fast-forward 还是三方合并？为什么？
 
-- [ ] **Step 9: 深度提问**
+- [ ] **Step 10: 深度提问**
   - 提 2-3 个原理性问题：
     1. "`git switch` 本质上对工作区做了什么？为什么切分支时已提交的文件会消失/出现？"
     2. "冲突标记 `<<<<<<<` 和 `>>>>>>>` 分别代表什么？为什么一定要手动处理？"
     3. "如果合并到一半发现搞错了，如何取消合并回到之前的状态？"
 
-- [ ] **Step 10: 提交**
+- [ ] **Step 11: 提交**
 
 ```bash
 git add module-2/
@@ -378,28 +397,37 @@ git commit -m "feat(module-3): 完成远程协作模块"
   - `git log --oneline --graph --all` 看漂亮的线条图
   - 对照练习：在每个分支上多做几次提交，让 graph 更丰富
 
-- [ ] **Step 4: 概念讲解 — revert vs reset（核心安全指南）**
+- [ ] **Step 4: 场景化模拟 — Detached HEAD（游离头指针）**
+  - 场景：用户 `git checkout <commit-hash>` 而不是分支名
+  - 终端会警告：`You are in 'detached HEAD' state...`
+  - **制造：** `git log --oneline` 取一个 hash → `git checkout <hash>` → 观察警告信息
+  - 解释：HEAD 没有指向分支，而是直接指向某次提交，Git 警告你"迷路了"
+  - 在 detached HEAD 状态下可以浏览，但新提交会"悬空"
+  - **安全回到分支：** `git switch main`（或 `git checkout main`）
+  - **心法：** 看到 detached HEAD 不要慌，`git switch <分支名>` 就回来了
+
+- [ ] **Step 6: 概念讲解 — revert vs reset（核心安全指南）**
   - `git revert <commit>`：创建一个"反向提交"来撤销，不丢失历史。**安全、适合共享分支**
   - `git reset --soft <commit>`：HEAD 移动，暂存区不变，工作区不变。**撤销 commit 但保留改动**
   - `git reset --mixed <commit>`（默认）：HEAD 移动，暂存区重置，工作区不变
   - `git reset --hard <commit>`：三棵树全回到过去。**危险！会丢失工作区未提交的改动**
   - 心法：**共享分支用 revert，本地分支用 reset**
 
-- [ ] **Step 5: 动手练习 — revert 和 reset**
+- [ ] **Step 7: 动手练习 — revert 和 reset**
   - 在 `module-4/` 做 3 次提交 → `git log --oneline`
   - `git revert HEAD` → 产生第 4 次提交，内容回到第 2 次的状态
   - `git log --oneline` 看到全部 4 次提交
   - 再演示 `git reset --hard HEAD~2` → 真的跳回去了
   - `git log --oneline` 发现 2 次提交消失（制造恐慌）
 
-- [ ] **Step 6: 场景化模拟 — reflog 后悔药**
+- [ ] **Step 8: 场景化模拟 — reflog 后悔药**
   - `git reflog` 看所有 HEAD 移动记录（包括 reset、rebase、merge）
   - 找到"丢失"的提交的哈希
   - `git reset --hard <hash>` 找回刚刚删掉的提交
   - **核心认知：** Git 几乎不真正删除数据，reflog 是终极后悔药
   - 心法：**reset --hard 不可怕，不知道 reflog 才可怕**
 
-- [ ] **Step 7: 概念讲解 + 动手 — stash**
+- [ ] **Step 9: 概念讲解 + 动手 — stash**
   - 场景：正在改代码，临时要去改别的 → 不想提交半成品
   - `git stash`：暂存当前工作区的**未提交**改动
   - `git stash list` 查看暂存列表
@@ -407,7 +435,7 @@ git commit -m "feat(module-3): 完成远程协作模块"
   - `git stash drop` 删除指定暂存
   - **场景化：** 用户正在工作区改一半，让用户 stash → 做别的事 → pop 恢复
 
-- [ ] **Step 8: 测验验证**
+- [ ] **Step 10: 测验验证**
   - **测验题：** 在 `module-4/` 下：
     1. 制造一个"误删了重要代码"的场景
     2. 用 `git reflog` 定位丢失的提交
@@ -415,13 +443,13 @@ git commit -m "feat(module-3): 完成远程协作模块"
     4. 用 `git revert` 模拟"在共享分支上安全撤销"
     5. 解释 revert 和 reset 的本质区别
 
-- [ ] **Step 9: 深度提问**
+- [ ] **Step 11: 深度提问**
   - 提 2-3 个原理性问题：
     1. "`git reset --hard` 后 `git status` 显示 clean，但 `git reflog` 却能找到旧提交，这说明什么？"
     2. "`git revert` 为什么要创建新提交而不是擦除历史？"
     3. "`git stash` 和 `git commit --amend` 各自适用于什么场景？"
 
-- [ ] **Step 10: 提交**
+- [ ] **Step 12: 提交**
 
 ```bash
 git add module-4/
@@ -436,24 +464,35 @@ git commit -m "feat(module-4): 完成历史追溯与回退模块"
 
 **教学目标：** 模拟真实开发场景，串联全部 5 个模块的知识。
 
-- [ ] **Step 1: 场景设定**
-  - 模拟场景：你是一个开发者，接到一个需求——在一个 Web 项目中添加用户登录功能
-  - 项目从零开始，经历：需求 → 开分支 → 开发 → 提交 → 合并 → 发现 bug → 回退 → 修复 → 推送
+- [ ] **Step 1: 场景设定（二选一）**
+  - **场景 A（Web 功能开发）：** 你是一个开发者，接到一个需求——在一个 Web 项目中添加用户登录功能。从零开始：需求 → 开分支 → 开发 → 提交 → 合并 → 发现 bug → 回退 → 修复 → 推送
+  - **场景 B（算法库管理）：** 你在整理蓝桥杯竞赛的练习代码，`solutions/` 目录里有零散的文件。任务是通过 Git 分支将"暴力解法"和"优化解法"分开管理，最后合并保留最佳实践。涉及：分支隔离、stash 切换上下文、合并策略选择
 
-- [ ] **Step 2: 引导执行 — 完整工作流**
-  - `cd module-5 && git init` 并加 `.gitignore`
-  - 初始提交：`feat: scaffold project`
-  - 从 main 创建 `feat/login` 分支
-  - 在分支上模拟开发：
-    - 创建 `login.html`、`login.css`、`login.js`
-    - 多次提交（使用约定式提交）
-  - 切回 main，模拟紧急 bug 修复：
-    - 修改 `README.md` 修正一个错误
-    - `commit -m "fix: correct readme typo"`
-  - 合并 `feat/login` 到 main（看是 fast-forward 还是三方合并）
-  - 发现 bug：README 中说错了功能名称
-  - `git revert <那个 commit>` 安全回滚
-  - 重新修复并提交
+- [ ] **Step 2: 引导执行 — 完整工作流（根据选择的场景）**
+  - **场景 A：** Web 功能开发流程
+    - `cd module-5 && git init` 并加 `.gitignore`
+    - 初始提交：`feat: scaffold project`
+    - 从 main 创建 `feat/login` 分支
+    - 在分支上模拟开发：
+      - 创建 `login.html`、`login.css`、`login.js`
+      - 多次提交（使用约定式提交）
+    - 切回 main，模拟紧急 bug 修复：
+      - 修改 `README.md` 修正一个错误
+      - `commit -m "fix: correct readme typo"`
+    - 合并 `feat/login` 到 main（看是 fast-forward 还是三方合并）
+    - 发现 bug：README 中说错了功能名称
+    - `git revert <那个 commit>` 安全回滚
+    - 重新修复并提交
+  - **场景 B：** 算法代码库管理
+    - `cd module-5 && git init`
+    - 创建 `solutions/` 目录和基础的 `.gitignore`
+    - 初始提交：`feat: init algorithm solutions repo`
+    - 在 `solutions/` 下创建一个问题文件 `two-sum/README.md` 描述两数之和问题
+    - 从 main 创建 `brute-force` 分支，写暴力解法（双层循环）→ 提交 `feat: add brute force for two-sum`
+    - 切回 main，创建 `optimized` 分支，写优化解法（哈希表）→ 提交 `feat: add hashmap solution for two-sum`
+    - 模拟竞赛场景：在 `brute-force` 分支上写了一半发现思路不对 → `git stash` → 切到 `optimized` 参考 → 切回来 → `git stash pop` 继续
+    - 评审后决定合并 `optimized` 到 main（保留最优解）
+    - 为 `brute-force` 分支保留不动作为学习记录
 
 - [ ] **Step 3: 场景化模拟 — 工作被打断**
   - 在 `feat/payment` 上开发到一半，紧急切换到 main：
