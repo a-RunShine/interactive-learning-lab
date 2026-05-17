@@ -1,0 +1,21 @@
+# 练习产物（module-N 内部 git 仓库）
+module-*/.git/
+module-*/java-app/target/
+module-*/java-app/.idea/
+module-*/*.class
+module-*/*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时
+*.tmp
+*.bak
