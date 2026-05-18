@@ -39,6 +39,8 @@ openspec/                       # 变更管理与 spec 系统
 
 ## Agent 操作手册
 
+> **同步提醒**：`.opencode/skills/` 和 `.claude/skills/` 两个目录需手动同步。修改 skill 后执行 `cp -r .opencode/skills/teach-anything .claude/skills/teach-anything`。
+
 ### 被加载为 teach-anything skill 时
 
 当检测到用户表达学习意图，自动加载 `.opencode/skills/teach-anything/SKILL.md` 并按其中定义的 Phase 1（方案协商）→ Phase 2（7 步教学）执行。

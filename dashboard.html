@@ -420,14 +420,26 @@ body {
       .replace(/'/g, '&#39;');
   }
 
+  function parseLocalDate(dateStr) {
+    if (!dateStr) return new Date();
+    var parts = dateStr.split('-');
+    if (parts.length === 3) return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    return new Date(dateStr);
+  }
+
   function formatDate(dateStr) {
-    var d = new Date(dateStr);
+    var d = parseLocalDate(dateStr);
     return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
   }
 
+  function todayLocal() {
+    var d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
   function isInCurrentWeek(dateStr) {
-    var d = new Date(dateStr);
-    var now = new Date();
+    var d = parseLocalDate(dateStr);
+    var now = todayLocal();
     var dayOfWeek = now.getDay() || 7;
     var monday = new Date(now);
     monday.setDate(now.getDate() - dayOfWeek + 1);
@@ -439,8 +451,8 @@ body {
   }
 
   function isInCurrentMonth(dateStr) {
-    var d = new Date(dateStr);
-    var now = new Date();
+    var d = parseLocalDate(dateStr);
+    var now = todayLocal();
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }
 
@@ -580,11 +592,19 @@ body {
       })
       .then(function (data) {
         allSessions = (data && data.sessions) ? data.sessions : [];
-        allSessions.sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+        allSessions.sort(function (a, b) { return parseLocalDate(b.date) - parseLocalDate(a.date); });
         render();
       })
-      .catch(function () {
-        $('sessionsGrid').innerHTML = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>还没有学习记录</h3><p>开始一次教学吧！对 OpenCode 说「我想学…」，<br>教学结束后学习记录会自动出现在这里。</p></div>';
+      .catch(function (err) {
+        var msg = '';
+        if (err instanceof SyntaxError) {
+          msg = '<div class="error-state"><h3>数据文件格式错误</h3><p>dashboard-data.json 解析失败，请检查文件内容是否完整。</p></div>';
+        } else if (err.message === 'HTTP 404') {
+          msg = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>还没有学习记录</h3><p>开始一次教学吧！对 OpenCode 说「我想学…」，<br>教学结束后学习记录会自动出现在这里。</p></div>';
+        } else {
+          msg = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>无法加载数据</h3><p>dashboard-data.json 不可读。如果是在本地以 file:// 打开，请用 HTTP 服务器：<br><code>python3 -m http.server</code> 或 <code>npx serve</code></p></div>';
+        }
+        $('sessionsGrid').innerHTML = msg;
         $('statsBar').innerHTML = '';
         $('errorSection').style.display = 'none';
       });

@@ -1,6 +1,6 @@
 # 通用交互式教学协议
 
-> 领域无关版本。本协议定义 AI Agent 如何以 7 步教学流程教授任意技能。
+> **规范来源**：本文件为 `.opencode/skills/teach-anything/SKILL.md` 的参考摘要。SKILL.md 是唯一规范源，本文件仅做快速查阅，内容以 SKILL.md 为准。
 
 ---
 
