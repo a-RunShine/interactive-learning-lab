@@ -214,41 +214,6 @@ metadata:
 
 ---
 
-# 会话数据持久化
-
-每次教学会话结束（全部模块完成或用户退出）时，将学习数据写入 `dashboard-data.json`，供 `dashboard.html` 学习仪表盘读取。
-
-## 写入流程
-
-1. 读取 `dashboard-data.json`（如不存在则创建空 `{ "sessions": [] }`）
-2. 构建本次会话记录：
-
-```json
-{
-  "topic": "<学习主题>",
-  "date": "<YYYY-MM-DD>",
-  "modules": [
-    { "name": "<模块名>", "completed": true, "stepsDone": 7 },
-    { "name": "<模块名>", "completed": false, "stepsDone": 3 }
-  ],
-  "errors": [
-    { "error": "<错误信息>", "module": "<发生模块>", "rootCause": "<根因>", "resolution": "<修复方案>" }
-  ]
-}
-```
-
-3. 将会话记录追加到 `sessions` 数组
-4. 写回 `dashboard-data.json`
-
-## 规则
-
-- 仅当有实质性教学交互时才写入（至少完成 1 个教学步骤）
-- 模块 `completed` 仅在完成该模块全部 7 步教学后标记为 `true`
-- 错误记录来自 RCA 引导协议中的"归档学习"数据
-- 写入后提示用户："学习记录已保存，打开 `dashboard.html` 查看学习仪表盘。"
-
----
-
 # Git 主题说明
 
 Git 与其他主题无异，均通过 Phase 1（协商）→ Phase 2（7 步教学）动态教学。技能本协议中没有预置模块，不分主题。用户说"我想学 Git 分支"，与"我想学 Python 数据结构"处理方式完全相同。
