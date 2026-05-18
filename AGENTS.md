@@ -6,6 +6,19 @@ This file provides guidance to OpenCode and Codex agents when working in this re
 
 「Git 交互式教学实验室」— 一个面向零基础用户的 Git 命令行教学仓库。学习方式：**AI Agent 引导式对话**，用户在真实 `module-N/` 目录中实操。
 
+## 通用教学 Skill
+
+本仓库包含 `teach-anything` skill（`.opencode/skills/teach-anything/SKILL.md`），可将教学能力从 Git 解耦到任意领域。
+
+**加载条件**：用户说"我想学 X"、"教我 X"、"学 X"等表达学习诉求时。
+
+**教学流程**：
+1. 诉求接收 → 模糊诉求追问缩小范围
+2. 方案起草 → 动态生成模块列表
+3. 方案协商 → 用户调整直到确认
+4. 逐模块 7 步教学 → 按确认方案执行
+5. Git 主题自动路由到本仓库 module-N/ 模块
+
 ## 教学协议
 
 **必须遵循** `TEACHING_PROTOCOL.md` 中定义的完整教学协议，包括：
