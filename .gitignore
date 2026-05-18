@@ -1,9 +1,5 @@
-# 练习产物（module-N 内部 git 仓库）
-module-*/.git/
-module-*/java-app/target/
-module-*/java-app/.idea/
-module-*/*.class
-module-*/*.log
+# 练习产物（learn-<topic> 教学练习目录）
+learn-*/
 
 # IDE
 .idea/
@@ -19,3 +15,4 @@ Thumbs.db
 # 临时
 *.tmp
 *.bak
+image.png
