@@ -411,6 +411,15 @@ body {
 
   function $(id) { return document.getElementById(id); }
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function formatDate(dateStr) {
     var d = new Date(dateStr);
     return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
@@ -494,10 +503,10 @@ body {
         errorHtml = '<span class="error-indicator no-errors">无错误</span>';
       }
 
-      var moduleNames = modules.map(function (m) { return m.name; }).join('、');
+      var moduleNames = modules.map(function (m) { return escapeHtml(m.name); }).join('、');
 
       return '<div class="session-card">'
-        + '<div class="session-topic" title="' + session.topic + '">' + session.topic + '</div>'
+        + '<div class="session-topic" title="' + escapeHtml(session.topic) + '">' + escapeHtml(session.topic) + '</div>'
         + '<div class="session-date">' + formatDate(session.date) + '</div>'
         + '<div class="module-progress">'
         + '<div class="progress-header"><span>' + completed + ' / ' + modules.length + ' 模块</span><span>' + (moduleNames || '无模块') + '</span></div>'
@@ -532,13 +541,13 @@ body {
         + '<div class="error-head">'
         + '<div class="error-symbol"></div>'
         + '<div class="error-head-text">'
-        + '<div class="error-name">' + (e.error || '未知错误') + '</div>'
-        + '<div class="error-module">' + item.session + ' · ' + (e.module || '未指定模块') + '</div>'
+        + '<div class="error-name">' + escapeHtml(e.error || '未知错误') + '</div>'
+        + '<div class="error-module">' + escapeHtml(item.session) + ' · ' + escapeHtml(e.module || '未指定模块') + '</div>'
         + '</div>'
         + '</div>'
         + '<div class="error-meta-grid">'
-        + '<span class="error-meta-label">根因</span><span class="error-meta-value">' + (e.rootCause || '未记录') + '</span>'
-        + '<span class="error-meta-label">修复</span><span class="error-meta-value">' + (e.resolution || '未记录') + '</span>'
+        + '<span class="error-meta-label">根因</span><span class="error-meta-value">' + escapeHtml(e.rootCause || '未记录') + '</span>'
+        + '<span class="error-meta-label">修复</span><span class="error-meta-value">' + escapeHtml(e.resolution || '未记录') + '</span>'
         + '</div>'
         + '</div>';
     }).join('');

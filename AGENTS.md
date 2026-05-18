@@ -31,8 +31,6 @@ docs/superpowers/
 └── specs/
     └── generic-teaching-protocol.md  # 通用教学协议（领域无关）
 
-scripts/                        # 工具脚本
-
 openspec/                       # 变更管理与 spec 系统
 ├── config.yaml
 ├── specs/                      # 正式 spec
