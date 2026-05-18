@@ -1,14 +1,12 @@
 schema: spec-driven
 
 context: |
-  Tech stack: POSIX Shell (scripts), Markdown (docs/teaching content)
+  Tech stack: Markdown (docs/teaching content)
   We use conventional commits (feat:, fix:, docs:, chore:)
-  Domain: AI-agent-driven Git interactive teaching
+  Domain: AI-agent-driven generic interactive teaching
   Primary audience: Chinese-speaking zero-basis learners
-  Teaching protocol: 7-step flow defined in TEACHING_PROTOCOL.md
-  Module dependency: strict sequential M0→M1→M2→M3→M4→M5 (M6 optional)
-  Agent guidance: AGENTS.md (OpenCode/Codex), CLAUDE.md (Claude Code)
-  Verification: scripts/verify/module-N.sh per module
+  Teaching protocol: teach-anything skill (`.opencode/skills/teach-anything/SKILL.md`)
+  Agent guidance: AGENTS.md
   Branch naming: main (not master)
 
 rules:
