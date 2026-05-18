@@ -2,7 +2,7 @@
 name: teach-anything
 description: 通用交互式教学 skill。当用户表达想学某技能/知识时加载——"我想学 X"、"教我 X"、"学 X"。解耦 Git 领域限制，支持任意主题的动态教学方案协商与 7 步教学流程。
 license: MIT
-compatibility: 需要 TEACHING_PROTOCOL.md（7 步流程参考）
+compatibility: 独立 skill，不依赖外部文件
 metadata:
   author: openspec
   version: "1.0"
@@ -23,9 +23,7 @@ metadata:
 
 ## 前置资源
 
-本仓库已定义 7 步教学协议（`TEACHING_PROTOCOL.md`）和 RCA 错误引导协议。本 skill 复用这些协议但解除 Git 绑定，使其适用于任意领域。
-
-教学前应读取 `TEACHING_PROTOCOL.md` 获取完整 7 步流程参考。
+本仓库提供 `docs/superpowers/specs/generic-teaching-protocol.md` 作为领域无关教学协议参考。本 skill 自包含全部教学指令，无需读取外部文件。
 
 ---
 
@@ -189,27 +187,6 @@ metadata:
 
 ---
 
-# Git 领域兼容
+# Git 主题说明
 
-## 检测 Git 诉求
-
-当用户诉求中包含以下关键词时，判定为 Git 主题：
-- Git / git / 版本控制 / 代码管理
-- 分支 / 合并 / 提交 / commit / branch / merge
-- 远程 / 仓库 / remote / push / pull
-- 其他 Git 专有术语
-
-## 使用现有模块教学
-
-判定为 Git 主题后：
-1. 读取本仓库 `module-N/STEPS.md`，将 module-0 至 module-6 映射为教学方案（而非动态生成模块）
-2. 方案展示时注明："检测到你想学 Git，本仓库有现成的教学模块："
-3. 列出 7 个模块供用户选择（可跳模块但提示前置依赖）
-4. 教学时按选定的 `module-N/STEPS.md` 逐步执行
-5. 每步完成后运行 `scripts/verify/module-N.sh` 进行验证
-
-**Git 教学特有指令**：
-- 模块顺序：M0→M1→M2→M3→M4→M5（M6 可选），有严格前置依赖
-- 验证命令：`ls -R module-N/`、`git -C module-N log --oneline --graph --all`、`scripts/verify/module-N.sh`
-- 主分支统一用 `main`，优先教 `git switch`/`git restore`
-- 目录路径已验证存在（`module-0/` 至 `module-6/`）
+Git 与其他主题无异，均通过 Phase 1（协商）→ Phase 2（7 步教学）动态教学。技能本协议中没有预置模块，不分主题。用户说"我想学 Git 分支"，与"我想学 Python 数据结构"处理方式完全相同。
