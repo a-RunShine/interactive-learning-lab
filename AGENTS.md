@@ -13,7 +13,8 @@
 | 文件 | 说明 |
 |------|------|
 | `.opencode/skills/teach-anything/SKILL.md` | **规范源** — 所有教学逻辑在此 |
-| `.claude/skills/teach-anything/SKILL.md` | Claude Code 同步副本 |
+| `.opencode/skills/teach-anything/scripts/` | 教学工具脚本（teach-state.py / teach-data.py） |
+| `.claude/skills/teach-anything/` | Claude Code 同步副本 |
 | `docs/superpowers/specs/generic-teaching-protocol.md` | 协议参考摘要（以 SKILL.md 为准） |
 
 > 修改 `.opencode/skills/teach-anything/SKILL.md` 后，须执行 `cp -r .opencode/skills/teach-anything .claude/skills/teach-anything` 同步。
@@ -131,7 +132,10 @@ learn-<topic>/module-N-<name>/
 ├── AGENTS.md                   ← 你正在看的
 ├── .opencode/skills/
 │   └── teach-anything/
-│       └── SKILL.md            教学 skill（规范源）
+│       ├── SKILL.md            教学 skill（规范源）
+│       └── scripts/            教学工具脚本
+│           ├── teach-state.py   检查点管理
+│           └── teach-data.py    数据持久化
 ├── .claude/skills/
 │   └── teach-anything/
 │       └── SKILL.md            Claude Code 副本
