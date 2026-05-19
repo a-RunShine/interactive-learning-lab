@@ -36,8 +36,8 @@ def cmd_save():
     for attempt in range(MAX_RETRIES):
         try:
             if DATA_FILE.exists():
+                mtime_before = DATA_FILE.stat().st_mtime_ns
                 with open(DATA_FILE, "r") as f:
-                    mtime_before = DATA_FILE.stat().st_mtime_ns
                     try:
                         data = json.load(f)
                     except json.JSONDecodeError:
