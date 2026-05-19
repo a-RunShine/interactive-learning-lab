@@ -2,7 +2,7 @@
 name: teach-anything
 description: 通用交互式教学 skill。当用户表达想学某技能/知识时加载——"我想学 X"、"教我 X"、"学 X"。解耦 Git 领域限制，支持任意主题的动态教学方案协商与 7 步教学流程。
 license: MIT
-compatibility: 独立 skill，不依赖外部文件
+compatibility: 独立 skill，依赖 Python 3.10+ 标准库（scripts/ 目录下）
 metadata:
   author: openspec
   version: "1.0"
@@ -115,7 +115,7 @@ metadata:
 ## 教学节奏控制
 
 - **每日建议**：每次教学 1-2 个模块（约 10-30 分钟），结束时提示"今天可以休息，随时说「继续学习」回来"
-- **进度持久化**：每步完成后写入 `learn-<topic>/.teaching-state.json` 检查点文件（见"检查点恢复"），支持跨会话恢复
+- **进度持久化**：每步完成后执行 `teach-state.py step learn-<topic> <步骤号>` 更新检查点（见"检查点恢复"），支持跨会话恢复
 - **模块切换**：模块完成时询问"这个模块学完了！下一模块是「<标题>」，继续还是先消化一下？"
 - 支持用户要求"回顾上一模块"或"重学当前模块"
 
@@ -148,36 +148,40 @@ metadata:
 
 ## 检查点恢复
 
-教学过程中在 `learn-<topic>/` 下维护 `.teaching-state.json` 检查点文件，支持跨会话恢复进度。
+通过 `teach-state.py` 脚本管理检查点。脚本必须在项目根目录执行。
 
-### 文件格式
+### 初始化
 
-```json
-{
-  "topic": "Python",
-  "plan": [
-    { "name": "变量与类型", "completed": true, "stepsDone": 7 },
-    { "name": "控制流", "completed": false, "stepsDone": 3 }
-  ],
-  "currentModuleIndex": 1,
-  "currentStep": 3
-}
+方案确认后、第 1 模块进入前执行：
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py init learn-<topic> \
+  --topic "<主题>" --modules "<模块1>,<模块2>,..."
 ```
 
-### 写入时机
+### 步骤推进（高频，每步 1 次）
 
-每完成一步（7 步流程中的任意一步），更新该文件覆盖旧值。文件始终只有一个。
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py step learn-<topic> <步骤号>
+```
+
+- `<步骤号>` 范围 1-7
+- 到达步骤 7 时自动标记该模块为 completed
+
+### 模块切换（低频，每模块 1 次）
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic>
+```
 
 ### 恢复流程
 
 用户说"继续学习"或"继续"时：
 
-1. 检查 `learn-<topic>/` 目录是否存在
-2. 读取 `.teaching-state.json`
-3. 展示当前进度："上次学到模块 2「控制流」的第 3 步，继续还是先回顾一下？"
-4. 用户确认后从断点继续
-
-若文件不存在（首次学习或已被清理），按正常 Phase 1 流程协商新方案。
+1. 执行 `teach-state.py get learn-<topic>`
+   - 若 exit code 非 0（无检查点），按正常 Phase 1 流程协商新方案
+2. 解析 stdout JSON，展示进度："上次学到模块 N「名称」的第 M 步，继续还是先回顾一下？"
+3. 用户确认后从断点继续
 
 ### 清理
 
@@ -286,17 +290,19 @@ Agent 评估：
 
 # 会话数据持久化
 
-每次教学会话结束（全部模块完成或用户退出）时，将学习数据写入 `dashboard-data.json`，供 `dashboard.html` 学习仪表盘读取。
+通过 `teach-data.py` 脚本管理数据持久化。脚本必须在项目根目录执行。
 
 ## 写入流程
 
-1. 读取 `dashboard-data.json`（如不存在则创建空 `{ "sessions": [] }`）
-2. 构建本次会话记录：
+教学会话结束时（全部模块完成或用户退出），Agent 构建完整 session 记录并通过 stdin 传入：
 
-```json
+```bash
+# Agent 构建 session 记录为 JSON
+# 然后通过管道传给 teach-data.py
+cat << 'EOF' | python3 .opencode/skills/teach-anything/scripts/teach-data.py save
 {
   "topic": "<学习主题>",
-  "date": "<YYYY-MM-DD（本地日期）>",
+  "date": "<YYYY-MM-DD>",
   "modules": [
     { "name": "<模块名>", "completed": true },
     { "name": "<模块名>", "completed": false }
@@ -305,10 +311,8 @@ Agent 评估：
     { "error": "<错误信息>", "module": "<发生模块>", "rootCause": "<根因>", "resolution": "<修复方案>" }
   ]
 }
+EOF
 ```
-
-3. 将会话记录追加到 `sessions` 数组
-4. 写回 `dashboard-data.json`
 
 ## 规则
 
@@ -316,8 +320,7 @@ Agent 评估：
 - 模块 `completed` 仅在完成该模块全部 7 步教学后标记为 `true`
 - 日期格式使用 `YYYY-MM-DD`（本地日期，不含时区）
 - 错误记录来自 RCA 引导协议中的"归档学习"数据
-- 写入后提示用户："学习记录已保存，打开 `dashboard.html` 查看学习仪表盘。"
-- **写入一致性**：读 → 追加 → 写回三步须连续执行，中间不做其他操作。若读取后发现文件结构与预期不符（可能被其他 agent 并发写入），应重新读取再追加。避免覆盖其他 agent 写入的数据。
+- **并发安全**：teach-data.py 使用临时文件 + 原子重命名写入，避免并发覆盖
 
 ---
 
