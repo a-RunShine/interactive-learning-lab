@@ -9,12 +9,32 @@ import sys
 from pathlib import Path
 
 
+def _read_state(path):
+    if not path.exists():
+        print("未找到检查点", file=sys.stderr)
+        sys.exit(1)
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError:
+        print("检查点文件损坏，请手动检查", file=sys.stderr)
+        sys.exit(3)
+
+
+def _write_state(path, state):
+    path.write_text(json.dumps(state, ensure_ascii=False, indent=2))
+
+
 def cmd_init(args):
     path = Path(args.path) / ".teaching-state.json"
     if path.exists() and not args.force:
         print("检查点文件已存在，使用 'step' 继续或手动删除后重新初始化", file=sys.stderr)
         sys.exit(4)
-    modules = [m.strip() for m in args.modules.split(",")]
+
+    modules = [m.strip() for m in args.modules.split(",") if m.strip()]
+    if not modules:
+        print("--modules 不能为空，至少提供一个模块名", file=sys.stderr)
+        sys.exit(2)
+
     state = {
         "topic": args.topic,
         "plan": [{"name": m, "completed": False, "stepsDone": 0} for m in modules],
@@ -22,61 +42,43 @@ def cmd_init(args):
         "currentStep": 0,
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2))
-    print(f"检查点已初始化: {path}")
+    _write_state(path, state)
+    print("检查点已初始化", file=sys.stderr)
 
 
 def cmd_step(args):
     path = Path(args.path) / ".teaching-state.json"
-    if not path.exists():
-        print("未找到检查点", file=sys.stderr)
-        sys.exit(1)
     step = args.step
     if step < 1 or step > 7:
         print("step_number 必须在 1-7 之间", file=sys.stderr)
         sys.exit(2)
-    try:
-        raw = path.read_text()
-        state = json.loads(raw)
-    except json.JSONDecodeError:
-        print("检查点文件损坏，请手动检查", file=sys.stderr)
-        sys.exit(3)
+
+    state = _read_state(path)
     idx = state["currentModuleIndex"]
+    if idx >= len(state["plan"]):
+        print("检查点文件损坏：currentModuleIndex 越界", file=sys.stderr)
+        sys.exit(3)
+
     state["currentStep"] = step
     state["plan"][idx]["stepsDone"] = step
     if step == 7:
         state["plan"][idx]["completed"] = True
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2))
+    _write_state(path, state)
 
 
 def cmd_next(args):
     path = Path(args.path) / ".teaching-state.json"
-    if not path.exists():
-        print("未找到检查点", file=sys.stderr)
-        sys.exit(1)
-    try:
-        state = json.loads(path.read_text())
-    except json.JSONDecodeError:
-        print("检查点文件损坏，请手动检查", file=sys.stderr)
-        sys.exit(3)
+    state = _read_state(path)
     if state["currentModuleIndex"] >= len(state["plan"]) - 1:
         print("已是最后一个模块，教学已完成，使用 'teach-data.py save' 保存记录", file=sys.stderr)
         sys.exit(2)
     state["currentModuleIndex"] += 1
     state["currentStep"] = 0
-    path.write_text(json.dumps(state, ensure_ascii=False, indent=2))
+    _write_state(path, state)
 
 
 def cmd_get(args):
-    path = Path(args.path) / ".teaching-state.json"
-    if not path.exists():
-        print("未找到检查点", file=sys.stderr)
-        sys.exit(1)
-    try:
-        state = json.loads(path.read_text())
-    except json.JSONDecodeError:
-        print("检查点文件损坏，请手动检查", file=sys.stderr)
-        sys.exit(3)
+    state = _read_state(Path(args.path) / ".teaching-state.json")
     print(json.dumps(state, ensure_ascii=False))
 
 
