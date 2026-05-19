@@ -178,10 +178,12 @@ python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic
 
 用户说"继续学习"或"继续"时：
 
-1. 执行 `teach-state.py get learn-<topic>`
+1. 执行 `python3 .opencode/skills/teach-anything/scripts/teach-state.py get learn-<topic>`
    - 若 exit code 非 0（无检查点），按正常 Phase 1 流程协商新方案
 2. 解析 stdout JSON，展示进度："上次学到模块 N「名称」的第 M 步，继续还是先回顾一下？"
 3. 用户确认后从断点继续
+
+**退出码速查**：0=成功, 1=文件不存在, 2=参数不合法, 3=JSON 损坏, 4=检查点已存在（init 拒绝）
 
 ### 清理
 
