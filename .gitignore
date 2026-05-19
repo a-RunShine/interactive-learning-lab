@@ -15,5 +15,5 @@ Thumbs.db
 # 临时
 *.tmp
 *.bak
-image.png
-PR.md
+images/
+PR/

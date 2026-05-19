@@ -33,8 +33,8 @@ Agent: "已更新方案。准备好了吗？从模块1开始。"
 
 ```bash
 # 1. 克隆
-git clone <repo-url>
-cd <repo-name>
+git clone https://github.com/a-RunShine/interactive-learning-lab.git
+cd https://github.com/a-RunShine/interactive-learning-lab.git
 
 # 2. 用 AI Agent 打开
 opencode       # 或 claude / codex
