@@ -38,7 +38,9 @@ metadata:
 
 ## 前置资源
 
-本仓库提供 `docs/superpowers/specs/generic-teaching-protocol.md` 作为领域无关教学协议参考。本 skill 自包含全部教学指令，无需读取外部文件。
+本仓库提供 `docs/superpowers/specs/generic-teaching-protocol.md` 作为领域无关教学协议参考。
+
+RCA 引导协议存放在 `references/rca-protocol.md`，仅在学生出错或步骤 6 全错时按需读取。
 
 ---
 
@@ -247,7 +249,8 @@ python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic
 Agent 评估：
   ├── 完全正确 → 肯定 → 进入步骤 7
   ├── 部分正确 → 肯定对的部分 → 指出问题 → 引导修正
-  └── 完全错误 → 走 RCA 引导协议（定位+追问+补漏）→ 确认理解后
+  └── 完全错误 → 走 RCA 引导协议（详见 references/rca-protocol.md）。
+                  核心原则：禁止直接给答案。
                       │
                       └── 用户坚持跳过 → 尊重选择，进入下一步
 ```
@@ -259,34 +262,9 @@ Agent 评估：
 - 示例："如果不用 Docker，你原来是怎么部署项目的？有什么痛点？"
 - 用户回答后给予评价，补充遗漏点
 
----
+# RCA 引导协议
 
-# 错误 RCA 引导协议
-
-教学过程中用户遇到错误时，**禁止直接给出正确答案**。按以下步骤引导：
-
-## 1. 定位锚点
-指出错误输出的关键行：
-> "看最后一行，`ModuleNotFoundError: No module named 'requests'`——它说找不到什么？"
-
-## 2. 线索追问
-反问用户，引导其主动思考：
-> "requests 是从哪里来的？你安装了没有？"
-> "你猜为什么 Python 能找到 print 但找不到 requests？"
-
-## 3. 原理补漏
-如果用户卡壳超过 2 轮追问，补充缺失的知识点：
-> "Python 内置的函数（如 print）不需要安装就能用。第三方库（如 requests）需要先用 pip install 下载。"
-
-## 4. 归档学习
-提示用户记录错题：
-```
-💡 建议记录：
-错误：ModuleNotFoundError
-根因：未安装第三方库
-修复：pip install requests
-预防：用新库前先确认是否已安装
-```
+详细指引见 `references/rca-protocol.md`
 
 ---
 
