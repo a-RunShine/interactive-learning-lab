@@ -1,6 +1,8 @@
 # 通用交互式教学协议
 
 > **规范来源**：本文件为 `.opencode/skills/teach-anything/SKILL.md` 的参考摘要。SKILL.md 是唯一规范源，本文件仅做快速查阅，内容以 SKILL.md 为准。
+>
+> **三层索引**：协议（本文件）→ skill（`SKILL.md`）→ 实现（`scripts/` 工具脚本 + `references/` 参考协议）
 
 ---
 
