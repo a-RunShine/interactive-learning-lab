@@ -27,6 +27,7 @@ SKILL.md 当前 331 行，承载三层职责：教学编排（Phase 1 协商、P
 | 文件命名 | `rca-protocol.md` | ✅ | 见名知意，protocol 强调是行为规范而非配置/模板 |
 | SKILL.md 引用方式 | `（详见 references/rca-protocol.md）` | ✅ | 一行内联引用，Agent 读取路径清晰 |
 | 步骤 6 全错分支 | 保持当前"走 RCA → 允许跳过"逻辑 | ✅ | 行为不变，仅引用路径变化 |
+| 核心原则留存 | 从 RCA 协议中前置一句"禁止直接给答案"到步骤 6 分支行内 | ✅ | 防止 Agent 忘记读取 rca-protocol.md 时仍保留底线；多 8 个字，不增加维护负担 |
 | .claude 同步 | `cp -r .opencode/skills/teach-anything .claude/skills/teach-anything` | ✅ | 沿用已有同步策略，不需引入新机制 |
 
 **备选方案**：考虑过拆分为独立 skill（`teach-rca`），但 Agent 在执行步骤 6 时需要同时加载两个 skill，增加了跨 skill 协调复杂度。当前 skill 内 reference 文件方案更轻。

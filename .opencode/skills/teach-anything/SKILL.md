@@ -249,7 +249,7 @@ python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic
 Agent 评估：
   ├── 完全正确 → 肯定 → 进入步骤 7
   ├── 部分正确 → 肯定对的部分 → 指出问题 → 引导修正
-  └── 完全错误 → 走 RCA 引导协议（详见 references/rca-protocol.md）。
+  └── 完全错误 → 走 RCA 引导协议（详见 `references/rca-protocol.md`）。
                   核心原则：禁止直接给答案。
                       │
                       └── 用户坚持跳过 → 尊重选择，进入下一步
