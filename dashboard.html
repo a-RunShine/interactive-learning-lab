@@ -6,14 +6,18 @@
 <title>学习仪表盘</title>
 <style>
 :root {
-  --color-bg: #fafbfc;
+  --color-bg: #f8fafb;
   --color-surface: #ffffff;
   --color-primary: #0f766e;
   --color-primary-dim: #ccfbf1;
+  --color-primary-light: #14b8a6;
+  --color-accent: #f59e0b;
+  --color-accent-dim: #fef3c7;
   --color-text: #1e293b;
   --color-text-secondary: #64748b;
   --color-text-muted: #94a3b8;
   --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
   --color-error: #dc2626;
   --color-error-dim: #fef2f2;
   --color-success: #16a34a;
@@ -23,6 +27,7 @@
   --shadow-card-hover: 0 0 0 1px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.08);
   --radius: 12px;
   --radius-sm: 8px;
+  --radius-xs: 6px;
   --transition: 180ms ease;
 }
 
@@ -38,17 +43,17 @@ body {
 }
 
 .container {
-  max-width: 960px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 56px 24px 64px;
+  padding: 48px 24px 64px;
 }
 
 .header {
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 
 .header h1 {
-  font-size: 1.75rem;
+  font-size: 1.625rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -57,43 +62,67 @@ body {
 .stats-bar {
   display: flex;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 }
 
 .stat {
   background: var(--color-surface);
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 16px 20px;
   box-shadow: var(--shadow-card);
   flex: 1 1 0;
-  min-width: 140px;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.stat-icon.streak { background: var(--color-accent-dim); }
+.stat-icon.topics { background: var(--color-primary-dim); }
+.stat-icon.modules { background: var(--color-success-dim); }
+.stat-icon.domains { background: #e0e7ff; }
+
+.stat-body { min-width: 0; }
+
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-primary);
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
+.stat-value.streak-val { color: var(--color-accent); }
+.stat-value.topics-val { color: var(--color-primary); }
+.stat-value.modules-val { color: var(--color-success); }
+
 .stat-label {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
-  margin-top: 8px;
+  margin-top: 4px;
   font-weight: 500;
 }
 
-.filter-row {
+.section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
-.filter-row h2 {
-  font-size: 1.125rem;
+.section-header h2 {
+  font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -102,26 +131,26 @@ body {
   display: flex;
   gap: 2px;
   background: var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   padding: 2px;
+  flex-wrap: wrap;
 }
 
 .filter-tab {
   border: none;
   background: none;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 5px 12px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-size: 0.78125rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   transition: background var(--transition), color var(--transition);
   font-family: inherit;
+  white-space: nowrap;
 }
 
-.filter-tab:hover {
-  color: var(--color-text);
-}
+.filter-tab:hover { color: var(--color-text); }
 
 .filter-tab.active {
   background: var(--color-surface);
@@ -129,115 +158,244 @@ body {
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
-.sessions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
-  margin-bottom: 44px;
+/* Domain Section */
+.domain-section {
+  margin-bottom: 10px;
 }
 
-.session-card {
+.domain-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 8px;
+}
+
+.domain-emoji {
+  font-size: 1.375rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.domain-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  flex: 1;
+}
+
+.domain-progress-text {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.topic-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-left: 48px;
+}
+
+.topic-card {
   background: var(--color-surface);
   border-radius: var(--radius);
-  padding: 22px 24px;
+  padding: 16px 18px;
   box-shadow: var(--shadow-card);
   transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
-.session-card:hover {
+.topic-card:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-1px);
 }
 
-.session-topic {
-  font-size: 1.0625rem;
+.topic-card.completed-card {
+  border-left: 3px solid var(--color-success);
+}
+
+.topic-card.active-card {
+  border-left: 3px solid var(--color-primary);
+}
+
+.card-topic {
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.3;
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.session-date {
-  font-size: 0.8125rem;
+.card-meta {
+  font-size: 0.75rem;
   color: var(--color-text-muted);
-  margin-bottom: 18px;
-}
-
-.module-progress {
   margin-bottom: 14px;
 }
 
-.progress-header {
+.card-modules {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
-.progress-track {
-  height: 5px;
-  background: var(--color-border);
-  border-radius: 3px;
-  overflow: hidden;
+.module-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: background 300ms ease;
 }
 
-.progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 3px;
-  transition: width 500ms ease;
-}
+.module-dot.done { background: var(--color-success); }
+.module-dot.current { background: var(--color-primary); box-shadow: 0 0 0 2px var(--color-primary-dim); }
+.module-dot.pending { background: var(--color-border); }
 
-.session-card-footer {
+.card-progress {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
 }
 
-.error-indicator {
-  font-size: 0.78125rem;
+.card-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.card-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 600ms ease;
+}
+
+.card-progress-fill.done-fill {
+  background: var(--color-success);
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.6875rem;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 12px;
-  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.card-badge.completed { background: var(--color-success-dim); color: var(--color-success); }
+.card-badge.in-progress { background: var(--color-primary-dim); color: var(--color-primary); }
+.card-badge.recent { background: var(--color-accent-dim); color: var(--color-accent); }
+
+/* Timeline */
+.timeline-section {
+  margin-top: 28px;
+  margin-bottom: 28px;
+}
+
+.timeline-group {
+  margin-bottom: 20px;
+}
+
+.timeline-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.timeline-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-entry {
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.875rem;
 }
 
-.error-indicator.has-errors {
-  background: var(--color-error-dim);
-  color: var(--color-error);
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.error-indicator.no-errors {
-  background: var(--color-success-dim);
-  color: var(--color-success);
-}
+.timeline-dot.done { background: var(--color-success); }
+.timeline-dot.active { background: var(--color-primary); }
+.timeline-dot.new { background: var(--color-accent); }
 
-.error-section {
-  padding-top: 8px;
-}
-
-.error-section h2 {
-  font-size: 1.125rem;
+.timeline-topic {
   font-weight: 600;
-  margin-bottom: 16px;
-  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.timeline-detail {
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.timeline-status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.timeline-status.done { color: var(--color-success); }
+.timeline-status.active { color: var(--color-primary); }
+
+/* Error Section */
+.error-section {
+  margin-top: 28px;
+}
+
+.error-section summary {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 0;
+  color: var(--color-text-secondary);
+  list-style: none;
+}
+
+.error-section summary::-webkit-details-marker { display: none; }
+
+.error-section summary::before {
+  content: '⚠️';
+  margin-right: 6px;
 }
 
 .error-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .error-entry {
   background: var(--color-surface);
   border-radius: var(--radius);
-  padding: 18px 22px;
+  padding: 16px 18px;
   box-shadow: var(--shadow-card);
   border-left: 3px solid var(--color-error);
 }
@@ -249,30 +407,18 @@ body {
   margin-bottom: 10px;
 }
 
-.error-symbol {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-error);
-  margin-top: 6px;
-  flex-shrink: 0;
-}
-
-.error-head-text {
-  flex: 1;
-  min-width: 0;
-}
+.error-head-text { flex: 1; min-width: 0; }
 
 .error-name {
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: var(--color-error);
   line-height: 1.3;
   word-break: break-word;
 }
 
 .error-module {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   margin-top: 3px;
 }
@@ -280,8 +426,8 @@ body {
 .error-meta-grid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 5px 14px;
-  font-size: 0.8125rem;
+  gap: 4px 14px;
+  font-size: 0.78125rem;
   line-height: 1.5;
 }
 
@@ -296,84 +442,53 @@ body {
   word-break: break-word;
 }
 
-.empty-state {
+/* States */
+.empty-state, .loading-state {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 72px 24px;
+  padding: 64px 24px;
 }
 
 .empty-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 20px;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
   border-radius: 50%;
   background: var(--color-primary-dim);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.empty-icon-inner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--color-primary);
-  border-radius: 3px;
-  position: relative;
-}
-
-.empty-icon-inner::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 4px;
-  border: 2px solid var(--color-primary);
-  border-top: none;
-  border-radius: 0 0 2px 2px;
+  font-size: 1.5rem;
 }
 
 .empty-state h3 {
-  font-size: 1.0625rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .empty-state p {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-text-secondary);
-  max-width: 340px;
+  max-width: 320px;
   margin: 0 auto;
   line-height: 1.7;
 }
 
-.no-results {
+.error-state {
   text-align: center;
-  padding: 48px 24px;
-  color: var(--color-text-muted);
-  grid-column: 1 / -1;
+  padding: 64px 24px;
+  color: var(--color-error);
   font-size: 0.875rem;
 }
 
-.loading-state {
-  text-align: center;
-  padding: 72px 24px;
-  color: var(--color-text-muted);
-}
-
-.error-state {
-  text-align: center;
-  padding: 72px 24px;
-  color: var(--color-error);
-}
-
 @media (max-width: 640px) {
-  .container { padding: 36px 16px 48px; }
-  .header h1 { font-size: 1.5rem; }
-  .stat-value { font-size: 1.5rem; }
-  .sessions-grid { grid-template-columns: 1fr; }
-  .filter-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .container { padding: 32px 16px 48px; }
+  .header h1 { font-size: 1.375rem; }
+  .stat-value { font-size: 1.25rem; }
+  .topic-cards { grid-template-columns: 1fr; padding-left: 0; }
+  .filter-tabs { gap: 1px; }
+  .filter-tab { padding: 5px 10px; font-size: 0.75rem; }
 }
 </style>
 </head>
@@ -386,39 +501,43 @@ body {
 
   <div class="stats-bar" id="statsBar"></div>
 
-  <div class="filter-row">
-    <h2>学习历史</h2>
-    <div class="filter-tabs" id="filterTabs">
-      <button class="filter-tab active" data-filter="all">全部</button>
-      <button class="filter-tab" data-filter="month">本月</button>
-      <button class="filter-tab" data-filter="week">本周</button>
-    </div>
+  <div class="section-header">
+    <h2>学习领域</h2>
+    <div class="filter-tabs" id="domainFilters"></div>
   </div>
 
-  <div class="sessions-grid" id="sessionsGrid"></div>
+  <div id="domainSections"></div>
 
-  <div class="error-section" id="errorSection" style="display:none">
-    <h2>错误记录</h2>
+  <div class="timeline-section" id="timelineSection">
+    <h2 style="font-size:1.0625rem;font-weight:600;margin-bottom:16px">学习时间线</h2>
+    <div id="timelineContent"></div>
+  </div>
+
+  <details class="error-section" id="errorSection" style="display:none">
+    <summary id="errorSummary">错误记录 (0)</summary>
     <div class="error-list" id="errorList"></div>
-  </div>
+  </details>
 
 </div>
 
 <script>
 (function () {
-  var currentFilter = 'all';
-  var allSessions = [];
+  var activeTopics = [];
+  var archiveSessions = [];
+  var mergedData = [];
+  var currentDomainFilter = 'all';
+
+  var DOMAIN_EMOJI = {
+    '编程语言': '\uD83D\uDC0D',
+    '工具与平台': '\uD83D\uDC33',
+    '数据与算法': '\uD83D\uDCCA',
+    '架构与设计': '\uD83C\uDFD7\uFE0F',
+    '工作流与方法论': '\uD83D\uDD04',
+    '其他': '\uD83D\uDCDA',
+    '未分类': '\uD83D\uDCE6'
+  };
 
   function $(id) { return document.getElementById(id); }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 
   function parseLocalDate(dateStr) {
     if (!dateStr) return new Date();
@@ -429,7 +548,7 @@ body {
 
   function formatDate(dateStr) {
     var d = parseLocalDate(dateStr);
-    return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    return d.getFullYear() + '\u5E74' + (d.getMonth() + 1) + '\u6708' + d.getDate() + '\u65E5';
   }
 
   function todayLocal() {
@@ -437,180 +556,455 @@ body {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
-  function isInCurrentWeek(dateStr) {
-    var d = parseLocalDate(dateStr);
-    var now = todayLocal();
-    var dayOfWeek = now.getDay() || 7;
-    var monday = new Date(now);
-    monday.setDate(now.getDate() - dayOfWeek + 1);
-    monday.setHours(0, 0, 0, 0);
-    var sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
-    return d >= monday && d <= sunday;
+  function yesterdayLocal() {
+    var d = todayLocal();
+    d.setDate(d.getDate() - 1);
+    return d;
   }
 
-  function isInCurrentMonth(dateStr) {
-    var d = parseLocalDate(dateStr);
-    var now = todayLocal();
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  function dateEquals(a, b) {
+    return a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth()
+        && a.getDate() === b.getDate();
   }
 
-  function filterSessions() {
-    if (currentFilter === 'all') return allSessions;
-    return allSessions.filter(function (s) {
-      if (currentFilter === 'week') return isInCurrentWeek(s.date);
-      if (currentFilter === 'month') return isInCurrentMonth(s.date);
-      return true;
-    });
+  function dateToYMD(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
-  function renderStats(sessions) {
-    var totalTopics = sessions.length;
-    var totalModules = 0;
-    var completedModules = 0;
-    var totalErrors = 0;
-    sessions.forEach(function (s) {
-      (s.modules || []).forEach(function (m) {
-        totalModules++;
-        if (m.completed) completedModules++;
+  function calculateStreak(dates) {
+    var unique = [];
+    var seen = {};
+    for (var i = 0; i < dates.length; i++) {
+      if (!seen[dates[i]]) { seen[dates[i]] = true; unique.push(dates[i]); }
+    }
+    unique.sort(function (a, b) { return parseLocalDate(b) - parseLocalDate(a); });
+
+    var expected = todayLocal();
+    var streak = 0;
+    for (var j = 0; j < unique.length; j++) {
+      var d = parseLocalDate(unique[j]);
+      if (dateEquals(d, expected)) {
+        streak++;
+        expected.setDate(expected.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function mergeData() {
+    var merged = {};
+    for (var i = 0; i < activeTopics.length; i++) {
+      var t = activeTopics[i];
+      merged[t.topic] = {
+        topic: t.topic,
+        domain: t.domain || '',
+        currentModule: t.currentModule || 1,
+        totalModules: t.totalModules || 0,
+        currentStep: t.currentStep || 0,
+        completed: t.completed || false,
+        updated: t.updated || '',
+        errors: [],
+        modules: []
+      };
+    }
+    for (var j = 0; j < archiveSessions.length; j++) {
+      var s = archiveSessions[j];
+      if (merged[s.topic]) {
+        if (!merged[s.topic].domain && s.domain) merged[s.topic].domain = s.domain;
+        merged[s.topic].date = s.date;
+        merged[s.topic].errors = s.errors || [];
+        merged[s.topic].archiveModules = s.modules || [];
+      } else {
+        merged[s.topic] = {
+          topic: s.topic,
+          domain: s.domain || '',
+          date: s.date,
+          currentModule: 0,
+          totalModules: (s.modules || []).length,
+          currentStep: 0,
+          completed: (s.modules || []).every(function (m) { return m.completed; }),
+          updated: s.date,
+          errors: s.errors || [],
+          modules: [],
+          archiveModules: s.modules || []
+        };
+      }
+    }
+    var result = [];
+    for (var key in merged) {
+      if (merged.hasOwnProperty(key)) {
+        var item = merged[key];
+        if (!item.domain) item.domain = '未分类';
+        result.push(item);
+      }
+    }
+    result.sort(function (a, b) { return (b.updated || '').localeCompare(a.updated || ''); });
+    return result;
+  }
+
+  function groupByDomain(data) {
+    var groups = {};
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+      if (!groups[d.domain]) groups[d.domain] = [];
+      groups[d.domain].push(d);
+    }
+    return groups;
+  }
+
+  function getModuleDots(item) {
+    var total = item.totalModules || 0;
+    if (total === 0) return [];
+    var completedCount = 0;
+    if (item.completed) return Array(total).fill('done');
+    for (var i = 0; i < item.currentModule - 1 && i < total; i++) completedCount++;
+    var dots = [];
+    for (var j = 0; j < total; j++) {
+      if (j < completedCount) dots.push('done');
+      else if (j === item.currentModule - 1) dots.push('current');
+      else dots.push('pending');
+    }
+    return dots;
+  }
+
+  function getDomainProgress(domain, topics) {
+    var totalMod = 0, doneMod = 0;
+    for (var i = 0; i < topics.length; i++) {
+      var t = topics[i];
+      var dots = getModuleDots(t);
+      totalMod += dots.length;
+      for (var j = 0; j < dots.length; j++) {
+        if (dots[j] === 'done') doneMod++;
+        if (t.completed && dots[j] !== 'done') {} // completed card: all are done
+      }
+      if (t.completed) doneMod = Math.max(doneMod, dots.length);
+    }
+    if (totalMod === 0) return 0;
+    return Math.round((doneMod / totalMod) * 100);
+  }
+
+  function getTimelineEntries() {
+    var entries = [];
+    var today = todayLocal();
+    var yesterday = yesterdayLocal();
+
+    for (var i = 0; i < mergedData.length; i++) {
+      var d = mergedData[i];
+      var date = d.date || d.updated || '';
+      if (!date) continue;
+      var dateObj = parseLocalDate(date);
+      var isToday = dateEquals(dateObj, today);
+      var isYesterday = dateEquals(dateObj, yesterday);
+
+      var type, desc;
+      if (d.completed || (d.archiveModules && d.archiveModules.every(function (m) { return m.completed; }))) {
+        type = 'done';
+        desc = '完成';
+      } else if (d.currentStep === 0) {
+        type = 'new';
+        desc = '开始';
+      } else {
+        type = 'active';
+        desc = '第' + d.currentStep + '步';
+      }
+      entries.push({
+        topic: d.topic,
+        domain: d.domain,
+        date: date,
+        dateObj: dateObj,
+        isToday: isToday,
+        isYesterday: isYesterday,
+        type: type,
+        desc: desc
       });
-      totalErrors += (s.errors || []).length;
-    });
+    }
+    entries.sort(function (a, b) { return b.dateObj - a.dateObj; });
+    return entries;
+  }
+
+  function renderStats() {
+    var ids = {};
+    for (var i = 0; i < mergedData.length; i++) {
+      ids[mergedData[i].topic] = true;
+    }
+    var totalTopics = Object.keys(ids).length;
+    var completedModules = 0;
+    for (var j = 0; j < mergedData.length; j++) {
+      var dots = getModuleDots(mergedData[j]);
+      for (var k = 0; k < dots.length; k++) {
+        if (dots[k] === 'done') completedModules++;
+      }
+      if (mergedData[j].completed && dots.every(function (x) { return x !== 'done'; })) {
+        completedModules += dots.length;
+      }
+    }
+
+    var domainSet = {};
+    for (var m = 0; m < mergedData.length; m++) {
+      domainSet[mergedData[m].domain] = true;
+    }
+
+    var allDates = [];
+    for (var n = 0; n < mergedData.length; n++) {
+      var dt = mergedData[n].date || mergedData[n].updated;
+      if (dt) allDates.push(dt);
+    }
+    var streak = calculateStreak(allDates);
 
     var stats = [
-      { value: totalTopics, label: '累计学习主题' },
-      { value: completedModules, label: '已完成模块' },
-      { value: totalErrors, label: '记录错误' }
+      { icon: 'streak', cls: 'streak-val', value: streak, label: '连续天数' },
+      { icon: 'topics', cls: 'topics-val', value: totalTopics, label: '学习主题' },
+      { icon: 'modules', cls: 'modules-val', value: completedModules, label: '完成模块' },
+      { icon: 'domains', cls: undefined, value: Object.keys(domainSet).length, label: '涉及领域' }
     ];
 
+    var emojiMap = { streak: '\uD83D\uDD25', topics: '\uD83D\uDCDA', modules: '\u2705', domains: '\uD83C\uDF10' };
+
     $('statsBar').innerHTML = stats.map(function (s) {
-      return '<div class="stat"><div class="stat-value">' + s.value + '</div><div class="stat-label">' + s.label + '</div></div>';
+      return '<div class="stat">'
+        + '<div class="stat-icon ' + s.icon + '">' + emojiMap[s.icon] + '</div>'
+        + '<div class="stat-body">'
+        + '<div class="stat-value' + (s.cls ? ' ' + s.cls : '') + '">' + s.value + '</div>'
+        + '<div class="stat-label">' + s.label + '</div>'
+        + '</div></div>';
     }).join('');
   }
 
-  function renderSessions(sessions) {
-    var grid = $('sessionsGrid');
+  function renderDomainSections() {
+    var domains = {};
+    for (var i = 0; i < mergedData.length; i++) {
+      var d = mergedData[i];
+      if (currentDomainFilter !== 'all' && d.domain !== currentDomainFilter) continue;
+      if (!domains[d.domain]) domains[d.domain] = [];
+      domains[d.domain].push(d);
+    }
 
-    if (sessions.length === 0) {
-      if (allSessions.length === 0) {
-        grid.innerHTML = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>还没有学习记录</h3><p>开始一次教学吧！对 OpenCode 说「我想学…」，<br>教学结束后学习记录会自动出现在这里。</p></div>';
-      } else {
-        grid.innerHTML = '<div class="no-results">当前筛选条件下没有学习记录</div>';
+    var domainOrder = ['编程语言', '工具与平台', '数据与算法', '架构与设计', '工作流与方法论', '其他', '未分类'];
+
+    var html = '';
+    for (var di = 0; di < domainOrder.length; di++) {
+      var dn = domainOrder[di];
+      if (!domains[dn] || domains[dn].length === 0) continue;
+      var topics = domains[dn];
+      var pct = getDomainProgress(dn, topics);
+      var emoji = DOMAIN_EMOJI[dn] || DOMAIN_EMOJI['未分类'];
+
+      html += '<div class="domain-section">'
+        + '<div class="domain-header">'
+        + '<div class="domain-emoji">' + emoji + '</div>'
+        + '<div class="domain-name">' + dn + '</div>'
+        + '<div class="domain-progress-text">' + pct + '% 完成</div>'
+        + '</div>'
+        + '<div class="topic-cards">';
+
+      for (var ti = 0; ti < topics.length; ti++) {
+        var t = topics[ti];
+        var dots = getModuleDots(t);
+        var doneCount = dots.filter(function (x) { return x === 'done'; }).length;
+        var cardPct = dots.length > 0 ? Math.round((doneCount / dots.length) * 100) : 0;
+        var cardClass = t.completed ? 'completed-card' : (t.currentStep > 0 ? 'active-card' : '');
+
+        var badge = '';
+        if (t.completed) {
+          badge = '<div class="card-badge completed">\u2714 \u5DF2\u5B66\u5B8C</div>';
+        } else if (t.currentStep > 0) {
+          badge = '<div class="card-badge in-progress">\u8FDB\u884C\u4E2D</div>';
+        }
+
+        var dateLabel = formatDate(t.date || t.updated || '');
+
+        html += '<div class="topic-card ' + cardClass + '">'
+          + badge
+          + '<div class="card-topic">' + t.topic + '</div>'
+          + '<div class="card-meta">' + dateLabel + '</div>';
+
+        if (dots.length > 0) {
+          html += '<div class="card-modules">';
+          for (var di2 = 0; di2 < dots.length; di2++) {
+            html += '<div class="module-dot ' + dots[di2] + '"></div>';
+          }
+          html += '</div>'
+            + '<div class="card-progress">'
+            + '<span>' + doneCount + '/' + dots.length + '</span>'
+            + '<div class="card-progress-bar">'
+            + '<div class="card-progress-fill' + (t.completed ? ' done-fill' : '') + '" style="width:' + cardPct + '%"></div>'
+            + '</div></div>';
+        }
+        html += '</div>';
       }
+
+      html += '</div></div>';
+    }
+
+    if (!html) {
+      html = '<div class="empty-state"><div class="empty-icon">\uD83D\uDCCB</div><h3>当前领域没有学习记录</h3><p>试试其他领域筛选，或者开始一个新主题的学习吧。</p></div>';
+    }
+
+    $('domainSections').innerHTML = html;
+  }
+
+  function renderFilters() {
+    var domainSet = {};
+    for (var i = 0; i < mergedData.length; i++) {
+      domainSet[mergedData[i].domain] = true;
+    }
+    var tabs = [];
+    for (var key in domainSet) {
+      if (domainSet.hasOwnProperty(key)) tabs.push(key);
+    }
+    tabs.sort();
+
+    var html = '<button class="filter-tab' + (currentDomainFilter === 'all' ? ' active' : '') + '" data-domain="all">全部</button>';
+    for (var j = 0; j < tabs.length; j++) {
+      html += '<button class="filter-tab' + (currentDomainFilter === tabs[j] ? ' active' : '') + '" data-domain="' + tabs[j] + '">' + tabs[j] + '</button>';
+    }
+    $('domainFilters').innerHTML = html;
+
+    var buttons = $('domainFilters').querySelectorAll('.filter-tab');
+    for (var k = 0; k < buttons.length; k++) {
+      buttons[k].addEventListener('click', function () {
+        currentDomainFilter = this.dataset.domain;
+        render();
+      });
+    }
+  }
+
+  function renderTimeline() {
+    var entries = getTimelineEntries();
+    if (currentDomainFilter !== 'all') {
+      entries = entries.filter(function (e) { return e.domain === currentDomainFilter; });
+    }
+
+    if (entries.length === 0) {
+      $('timelineContent').innerHTML = '<div class="empty-state"><div class="empty-icon">\uD83D\uDCC5</div><h3>暂无学习时间线</h3><p>开始学习后，每天的学习活动会出现在这里。</p></div>';
       return;
     }
 
-    grid.innerHTML = sessions.map(function (session) {
-      var modules = session.modules || [];
-      var errors = session.errors || [];
-      var completed = modules.filter(function (m) { return m.completed; }).length;
-      var pct = modules.length > 0 ? Math.round((completed / modules.length) * 100) : 0;
-      var errorCount = errors.length;
+    var groups = [];
+    var today = todayLocal();
+    var yesterday = yesterdayLocal();
+    var currentGroup = null;
 
-      var errorHtml = '';
-      if (errorCount > 0) {
-        errorHtml = '<span class="error-indicator has-errors">' + errorCount + ' 个错误</span>';
-      } else {
-        errorHtml = '<span class="error-indicator no-errors">无错误</span>';
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var label;
+      if (e.isToday) label = '今天';
+      else if (e.isYesterday) label = '昨天';
+      else label = formatDate(e.date);
+
+      if (!currentGroup || currentGroup.label !== label) {
+        currentGroup = { label: label, entries: [] };
+        groups.push(currentGroup);
+      }
+      currentGroup.entries.push(e);
+    }
+
+    var html = '';
+    for (var g = 0; g < groups.length; g++) {
+      html += '<div class="timeline-group">'
+        + '<div class="timeline-label">' + groups[g].label + '</div>'
+        + '<div class="timeline-entries">';
+
+      for (var ei = 0; ei < groups[g].entries.length; ei++) {
+        var entry = groups[g].entries[ei];
+        var dotClass = entry.type;
+        var statusClass = entry.type === 'done' ? 'done' : 'active';
+        var statusText = entry.type === 'done' ? '\u2714 ' + entry.desc : entry.desc;
+        html += '<div class="timeline-entry">'
+          + '<div class="timeline-dot ' + dotClass + '"></div>'
+          + '<span class="timeline-topic">' + entry.topic + '</span>'
+          + '<span class="timeline-detail">-</span>'
+          + '<span class="timeline-status ' + statusClass + '">' + statusText + '</span>'
+          + '</div>';
       }
 
-      var moduleNames = modules.map(function (m) { return escapeHtml(m.name); }).join('、');
-
-      return '<div class="session-card">'
-        + '<div class="session-topic" title="' + escapeHtml(session.topic) + '">' + escapeHtml(session.topic) + '</div>'
-        + '<div class="session-date">' + formatDate(session.date) + '</div>'
-        + '<div class="module-progress">'
-        + '<div class="progress-header"><span>' + completed + ' / ' + modules.length + ' 模块</span><span>' + (moduleNames || '无模块') + '</span></div>'
-        + '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>'
-        + '</div>'
-        + '<div class="session-card-footer">' + errorHtml + '</div>'
-        + '</div>';
-    }).join('');
+      html += '</div></div>';
+    }
+    $('timelineContent').innerHTML = html;
   }
 
-  function renderErrors(sessions) {
+  function renderErrors() {
     var allErrors = [];
-    sessions.forEach(function (s) {
-      (s.errors || []).forEach(function (e) {
-        allErrors.push({ session: s.topic, date: s.date, error: e });
-      });
-    });
+    for (var i = 0; i < mergedData.length; i++) {
+      var s = mergedData[i];
+      if (currentDomainFilter !== 'all' && s.domain !== currentDomainFilter) continue;
+      for (var j = 0; j < (s.errors || []).length; j++) {
+        allErrors.push({ session: s.topic, error: s.errors[j] });
+      }
+    }
 
     var section = $('errorSection');
-    var list = $('errorList');
-
     if (allErrors.length === 0) {
       section.style.display = 'none';
       return;
     }
-
     section.style.display = '';
 
-    list.innerHTML = allErrors.map(function (item) {
+    $('errorSummary').textContent = '错误记录 (' + allErrors.length + ')';
+    $('errorList').innerHTML = allErrors.map(function (item) {
       var e = item.error;
       return '<div class="error-entry">'
         + '<div class="error-head">'
-        + '<div class="error-symbol"></div>'
         + '<div class="error-head-text">'
-        + '<div class="error-name">' + escapeHtml(e.error || '未知错误') + '</div>'
-        + '<div class="error-module">' + escapeHtml(item.session) + ' · ' + escapeHtml(e.module || '未指定模块') + '</div>'
-        + '</div>'
-        + '</div>'
+        + '<div class="error-name">' + (e.error || '未知错误') + '</div>'
+        + '<div class="error-module">' + item.session + ' \u00B7 ' + (e.module || '未指定模块') + '</div>'
+        + '</div></div>'
         + '<div class="error-meta-grid">'
-        + '<span class="error-meta-label">根因</span><span class="error-meta-value">' + escapeHtml(e.rootCause || '未记录') + '</span>'
-        + '<span class="error-meta-label">修复</span><span class="error-meta-value">' + escapeHtml(e.resolution || '未记录') + '</span>'
-        + '</div>'
-        + '</div>';
+        + '<span class="error-meta-label">根因</span><span class="error-meta-value">' + (e.rootCause || '未记录') + '</span>'
+        + '<span class="error-meta-label">修复</span><span class="error-meta-value">' + (e.resolution || '未记录') + '</span>'
+        + '</div></div>';
     }).join('');
   }
 
   function render() {
-    var filtered = filterSessions();
-    renderStats(filtered);
-    renderSessions(filtered);
-    renderErrors(filtered);
-  }
-
-  function initFilters() {
-    var tabs = $('filterTabs').querySelectorAll('.filter-tab');
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.classList.remove('active'); });
-        tab.classList.add('active');
-        currentFilter = tab.dataset.filter;
-        render();
-      });
-    });
+    renderStats();
+    renderFilters();
+    renderDomainSections();
+    renderTimeline();
+    renderErrors();
   }
 
   function loadData() {
-    fetch('dashboard-data.json')
+    var errorEl = $('domainSections');
+    var activePromise = fetch('active-topics.json')
+      .then(function (res) {
+        if (res.ok) return res.json();
+        return [];
+      })
+      .catch(function () { return []; });
+
+    var archivePromise = fetch('dashboard-data.json')
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
       .then(function (data) {
-        allSessions = (data && data.sessions) ? data.sessions : [];
-        allSessions.sort(function (a, b) { return parseLocalDate(b.date) - parseLocalDate(a.date); });
-        render();
+        return (data && data.sessions) ? data.sessions : [];
       })
       .catch(function (err) {
-        var msg = '';
-        if (err instanceof SyntaxError) {
-          msg = '<div class="error-state"><h3>数据文件格式错误</h3><p>dashboard-data.json 解析失败，请检查文件内容是否完整。</p></div>';
-        } else if (err.message === 'HTTP 404') {
-          msg = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>还没有学习记录</h3><p>开始一次教学吧！对 OpenCode 说「我想学…」，<br>教学结束后学习记录会自动出现在这里。</p></div>';
-        } else {
-          msg = '<div class="empty-state"><div class="empty-icon"><div class="empty-icon-inner"></div></div><h3>无法加载数据</h3><p>dashboard-data.json 不可读。如果是在本地以 file:// 打开，请用 HTTP 服务器：<br><code>python3 -m http.server</code> 或 <code>npx serve</code></p></div>';
-        }
-        $('sessionsGrid').innerHTML = msg;
+        if (err.message === 'HTTP 404') return [];
+        throw err;
+      });
+
+    Promise.all([activePromise, archivePromise])
+      .then(function (results) {
+        activeTopics = results[0];
+        archiveSessions = results[1];
+        mergedData = mergeData();
+        render();
+      })
+      .catch(function () {
+        errorEl.innerHTML = '<div class="error-state">\u6570\u636E\u52A0\u8F7D\u5931\u8D25\uFF0C\u8BF7\u68C0\u67E5\u6587\u4EF6\u662F\u5426\u5B8C\u6574\u3002</div>';
         $('statsBar').innerHTML = '';
+        $('domainFilters').innerHTML = '';
+        $('timelineContent').innerHTML = '';
         $('errorSection').style.display = 'none';
       });
   }
 
-  initFilters();
   loadData();
 })();
 </script>

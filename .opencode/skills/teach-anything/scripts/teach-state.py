@@ -42,6 +42,8 @@ def cmd_init(args):
         "currentModuleIndex": 0,
         "currentStep": 0,
     }
+    if args.domain:
+        state["domain"] = args.domain
     path.parent.mkdir(parents=True, exist_ok=True)
     _write_state(path, state)
     print("检查点已初始化", file=sys.stderr)
@@ -100,8 +102,10 @@ def cmd_list(args):
 
         plan = state.get("plan", [])
         topic = state.get("topic", "") or state_file.parent.name.replace("learn-", "", 1)
+        domain = state.get("domain", "") or "未分类"
         results.append({
             "topic": topic,
+            "domain": domain,
             "currentModule": state.get("currentModuleIndex", 0) + 1,
             "totalModules": len(plan),
             "currentStep": state.get("currentStep", 0),
@@ -124,6 +128,7 @@ def main():
     p.add_argument("path", help="learn-<topic>/ 目录路径")
     p.add_argument("--topic", required=True)
     p.add_argument("--modules", required=True, help="逗号分隔的模块名")
+    p.add_argument("--domain", default=None, help="领域分类（编程语言/工具与平台/...）")
     p.add_argument("--force", action="store_true", help="覆盖已有检查点")
 
     p = sub.add_parser("step", help="推进步骤（高频，每步1次）")
@@ -136,7 +141,7 @@ def main():
     p = sub.add_parser("get", help="读取检查点（JSON stdout）")
     p.add_argument("path")
 
-    sub.add_parser("list", help="列出所有活跃主题及进度")
+    sub.add_parser("list", help="列出所有活跃主题及进度（含领域分类）")
 
     args = parser.parse_args()
 
