@@ -29,12 +29,22 @@ Agent: "已更新方案。准备好了吗？从模块1开始。"
 └── 学完了？打开 dashboard.html 回顾学习记录
 ```
 
+## 前置要求
+
+| 依赖 | 版本 | 说明 |
+|------|------|------|
+| AI 编码 Agent | OpenCode ≥ 1.0 / Claude Code / Codex | 教学引导引擎 |
+| Python | ≥ 3.10 | 检查点管理、数据持久化（标准库，零 pip 依赖） |
+| Git | ≥ 2.30 | 克隆仓库、版本管理 |
+
+教学脚本无需安装——直接通过 Agent 调用，不依赖任何第三方包。
+
 ## 快速开始
 
 ```bash
 # 1. 克隆
 git clone https://github.com/a-RunShine/interactive-learning-lab.git
-cd https://github.com/a-RunShine/interactive-learning-lab.git
+cd interactive-learning-lab
 
 # 2. 用 AI Agent 打开
 opencode       # 或 claude / codex
@@ -43,9 +53,12 @@ opencode       # 或 claude / codex
 # "我想学 Python 基础"
 # "教我写 Dockerfile"
 # "我想了解数据库索引原理"
+
+# 4. （可选）检查仓库一致性
+bash scripts/check-consistency.sh
 ```
 
-Agent 会自动加载 `teach-anything` skill，全程引导你学习。
+Agent 会自动加载 `teach-anything` skill，全程引导你学习。无需手动安装任何东西。
 
 ## 教学流程
 
@@ -66,12 +79,12 @@ Agent 会自动加载 `teach-anything` skill，全程引导你学习。
 **适合**需要建立心智模型、能动手操作的知识：
 
 ```
-适合                   不适合
-────────────────────────────────
-编程语言 / 框架         单词表 / 定义记忆
-Git / Docker / SQL      事实性知识（年号人名）
-架构 / 协议 / 设计      纯机械操作
-工作流 / 方法论         "记住就行"的内容
+适合                     不适合
+─────────────────────────────────
+编程语言 / 框架           单词表 / 定义记忆
+Git / Docker / SQL        事实性知识（年号人名）
+架构 / 协议 / 设计        纯机械操作
+工作流 / 方法论           "记住就行"的内容
 ```
 
 判断标准：一个主题能不能自然地经历"理解→实操→犯错→反思"？能就上车。
@@ -116,16 +129,53 @@ OpenCode / Claude Code / Codex 均可使用，行为一致。
 ## 项目结构
 
 ```
-├── AGENTS.md                   Agent 引导
+├── AGENTS.md                    Agent 行为引导（完整教学规范）
+├── scripts/
+│   └── check-consistency.sh     仓库一致性自检脚本
 ├── .opencode/skills/
 │   └── teach-anything/
-│       └── SKILL.md            通用教学 skill（核心）
-├── dashboard.html               学习仪表盘
-├── dashboard-data.json          学习数据
+│       ├── SKILL.md              通用教学 skill（核心规范源）
+│       ├── references/
+│       │   └── rca-protocol.md   错误 RCA 引导协议
+│       └── scripts/
+│           ├── teach-state.py     检查点管理（init/step/next/get）
+│           └── teach-data.py      数据持久化（会话记录归档）
+├── .claude/skills/
+│   └── teach-anything/           Claude Code 同步副本
+├── dashboard.html                 学习仪表盘（零依赖）
+├── dashboard-data.json            学习数据存储
 ├── docs/superpowers/specs/
-│   └── generic-teaching-protocol.md  教学协议参考
-└── openspec/                   变更管理
+│   └── generic-teaching-protocol.md  教学协议参考（三层索引）
+├── learn-*/                       教学练习目录（gitignored）
+└── openspec/                      变更管理（proposal/design/specs/tasks）
 ```
+
+## 开发
+
+### 修改教学 skill
+
+核心文件为 `.opencode/skills/teach-anything/SKILL.md`。修改后必须同步到 `.claude/`：
+
+```bash
+cp -r .opencode/skills/teach-anything .claude/skills/teach-anything
+```
+
+### 仓库一致性检查
+
+```bash
+bash scripts/check-consistency.sh
+```
+
+检查三项：
+1. `.opencode/` 和 `.claude/` 文件内容一致（防止两边不同步）
+2. SKILL.md 引用的脚本路径真实存在
+3. 退出码方案与脚本中的 `sys.exit()` 一致
+
+### 贡献规范
+
+- 分支：`main`
+- 提交：`feat:` / `fix:` / `docs:` / `chore:`
+- 教学数据文件（`dashboard-data.json`、`learn-*/`）由 Agent 自动操作，不要手动编辑
 
 ## 贡献
 
