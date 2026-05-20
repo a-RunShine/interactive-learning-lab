@@ -2,7 +2,7 @@
 name: teach-anything
 description: 通用交互式教学 skill。当用户表达想学某技能/知识时加载——"我想学 X"、"教我 X"、"学 X"。解耦 Git 领域限制，支持任意主题的动态教学方案协商与 7 步教学流程。
 license: MIT
-compatibility: 独立 skill，不依赖外部文件
+compatibility: 独立 skill，依赖 Python 3.10+ 标准库（scripts/ 目录下）
 metadata:
   author: openspec
   version: "1.0"
@@ -38,7 +38,9 @@ metadata:
 
 ## 前置资源
 
-本仓库提供 `docs/superpowers/specs/generic-teaching-protocol.md` 作为领域无关教学协议参考。本 skill 自包含全部教学指令，无需读取外部文件。
+本仓库提供 `docs/superpowers/specs/generic-teaching-protocol.md` 作为领域无关教学协议参考。
+
+RCA 引导协议存放在 `references/rca-protocol.md`，仅在学生出错或步骤 6 全错时按需读取。
 
 ---
 
@@ -115,7 +117,7 @@ metadata:
 ## 教学节奏控制
 
 - **每日建议**：每次教学 1-2 个模块（约 10-30 分钟），结束时提示"今天可以休息，随时说「继续学习」回来"
-- **进度持久化**：每步完成后写入 `learn-<topic>/.teaching-state.json` 检查点文件（见"检查点恢复"），支持跨会话恢复
+- **进度持久化**：每步完成后执行 `teach-state.py step learn-<topic> <步骤号>` 更新检查点（见"检查点恢复"），支持跨会话恢复
 - **模块切换**：模块完成时询问"这个模块学完了！下一模块是「<标题>」，继续还是先消化一下？"
 - 支持用户要求"回顾上一模块"或"重学当前模块"
 
@@ -148,36 +150,42 @@ metadata:
 
 ## 检查点恢复
 
-教学过程中在 `learn-<topic>/` 下维护 `.teaching-state.json` 检查点文件，支持跨会话恢复进度。
+通过 `teach-state.py` 脚本管理检查点。脚本必须在项目根目录执行。
 
-### 文件格式
+### 初始化
 
-```json
-{
-  "topic": "Python",
-  "plan": [
-    { "name": "变量与类型", "completed": true, "stepsDone": 7 },
-    { "name": "控制流", "completed": false, "stepsDone": 3 }
-  ],
-  "currentModuleIndex": 1,
-  "currentStep": 3
-}
+方案确认后、第 1 模块进入前执行：
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py init learn-<topic> \
+  --topic "<主题>" --modules "<模块1>,<模块2>,..."
 ```
 
-### 写入时机
+### 步骤推进（高频，每步 1 次）
 
-每完成一步（7 步流程中的任意一步），更新该文件覆盖旧值。文件始终只有一个。
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py step learn-<topic> <步骤号>
+```
+
+- `<步骤号>` 范围 1-7
+- 到达步骤 7 时自动标记该模块为 completed
+
+### 模块切换（低频，每模块 1 次）
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic>
+```
 
 ### 恢复流程
 
 用户说"继续学习"或"继续"时：
 
-1. 检查 `learn-<topic>/` 目录是否存在
-2. 读取 `.teaching-state.json`
-3. 展示当前进度："上次学到模块 2「控制流」的第 3 步，继续还是先回顾一下？"
-4. 用户确认后从断点继续
+1. 执行 `python3 .opencode/skills/teach-anything/scripts/teach-state.py get learn-<topic>`
+   - 若 exit code 非 0（无检查点），按正常 Phase 1 流程协商新方案
+2. 解析 stdout JSON，展示进度："上次学到模块 N「名称」的第 M 步，继续还是先回顾一下？"
+3. 用户确认后从断点继续
 
-若文件不存在（首次学习或已被清理），按正常 Phase 1 流程协商新方案。
+**退出码速查**：0=成功, 1=文件不存在, 2=参数不合法, 3=JSON 损坏, 4=检查点已存在（init 拒绝）
 
 ### 清理
 
@@ -227,6 +235,13 @@ metadata:
   > 示例："下面演示一个常见错误：如果误执行 `git reset --hard HEAD~1` 会丢失最近一次提交的改动。要试试看吗？我来指导你恢复。"
 - 如果当前领域难以制造「操作型」危机，用「陷阱题」替代：出题考察理解的边界情况
 
+```
+执行检查：
+[x] 错误是可修复/可逆的？
+[x] 已告知用户将要演示什么、有什么影响？
+[x] 危险操作时 → 已获得用户确认？（未确认不得执行）
+```
+
 ### 步骤 6：结课测验
 - 当前教学单元结束时的综合任务
 - 1-3 道题，不给具体步骤，只给需求
@@ -241,9 +256,17 @@ metadata:
 Agent 评估：
   ├── 完全正确 → 肯定 → 进入步骤 7
   ├── 部分正确 → 肯定对的部分 → 指出问题 → 引导修正
-  └── 完全错误 → 走 RCA 引导协议（定位+追问+补漏）→ 确认理解后
+  └── 完全错误 → 走 RCA 引导协议（详见 `references/rca-protocol.md`）。
+                  核心原则：禁止直接给答案。
                       │
                       └── 用户坚持跳过 → 尊重选择，进入下一步
+```
+
+```
+执行检查：
+[x] 已让用户自评？
+[x] 全对→肯定 | 部分→引导修正 | 全错→RCA
+[x] 用户坚持跳过 → 尊重选择，不强迫
 ```
 
 ### 步骤 7：灵魂追问
@@ -253,50 +276,27 @@ Agent 评估：
 - 示例："如果不用 Docker，你原来是怎么部署项目的？有什么痛点？"
 - 用户回答后给予评价，补充遗漏点
 
----
+# RCA 引导协议
 
-# 错误 RCA 引导协议
-
-教学过程中用户遇到错误时，**禁止直接给出正确答案**。按以下步骤引导：
-
-## 1. 定位锚点
-指出错误输出的关键行：
-> "看最后一行，`ModuleNotFoundError: No module named 'requests'`——它说找不到什么？"
-
-## 2. 线索追问
-反问用户，引导其主动思考：
-> "requests 是从哪里来的？你安装了没有？"
-> "你猜为什么 Python 能找到 print 但找不到 requests？"
-
-## 3. 原理补漏
-如果用户卡壳超过 2 轮追问，补充缺失的知识点：
-> "Python 内置的函数（如 print）不需要安装就能用。第三方库（如 requests）需要先用 pip install 下载。"
-
-## 4. 归档学习
-提示用户记录错题：
-```
-💡 建议记录：
-错误：ModuleNotFoundError
-根因：未安装第三方库
-修复：pip install requests
-预防：用新库前先确认是否已安装
-```
+详细指引见 `references/rca-protocol.md`
 
 ---
 
 # 会话数据持久化
 
-每次教学会话结束（全部模块完成或用户退出）时，将学习数据写入 `dashboard-data.json`，供 `dashboard.html` 学习仪表盘读取。
+通过 `teach-data.py` 脚本管理数据持久化。脚本必须在项目根目录执行。
 
 ## 写入流程
 
-1. 读取 `dashboard-data.json`（如不存在则创建空 `{ "sessions": [] }`）
-2. 构建本次会话记录：
+教学会话结束时（全部模块完成或用户退出），Agent 构建完整 session 记录并通过 stdin 传入：
 
-```json
+```bash
+# Agent 构建 session 记录为 JSON
+# 然后通过管道传给 teach-data.py
+cat << 'EOF' | python3 .opencode/skills/teach-anything/scripts/teach-data.py save
 {
   "topic": "<学习主题>",
-  "date": "<YYYY-MM-DD（本地日期）>",
+  "date": "<YYYY-MM-DD>",
   "modules": [
     { "name": "<模块名>", "completed": true },
     { "name": "<模块名>", "completed": false }
@@ -305,10 +305,8 @@ Agent 评估：
     { "error": "<错误信息>", "module": "<发生模块>", "rootCause": "<根因>", "resolution": "<修复方案>" }
   ]
 }
+EOF
 ```
-
-3. 将会话记录追加到 `sessions` 数组
-4. 写回 `dashboard-data.json`
 
 ## 规则
 
@@ -316,8 +314,7 @@ Agent 评估：
 - 模块 `completed` 仅在完成该模块全部 7 步教学后标记为 `true`
 - 日期格式使用 `YYYY-MM-DD`（本地日期，不含时区）
 - 错误记录来自 RCA 引导协议中的"归档学习"数据
-- 写入后提示用户："学习记录已保存，打开 `dashboard.html` 查看学习仪表盘。"
-- **写入一致性**：读 → 追加 → 写回三步须连续执行，中间不做其他操作。若读取后发现文件结构与预期不符（可能被其他 agent 并发写入），应重新读取再追加。避免覆盖其他 agent 写入的数据。
+- **并发安全**：teach-data.py 使用临时文件 + 原子重命名写入，避免并发覆盖
 
 ---
 
