@@ -180,10 +180,35 @@ python3 .opencode/skills/teach-anything/scripts/teach-state.py next learn-<topic
 
 用户说"继续学习"或"继续"时：
 
-1. 执行 `python3 .opencode/skills/teach-anything/scripts/teach-state.py get learn-<topic>`
-   - 若 exit code 非 0（无检查点），按正常 Phase 1 流程协商新方案
-2. 解析 stdout JSON，展示进度："上次学到模块 N「名称」的第 M 步，继续还是先回顾一下？"
-3. 用户确认后从断点继续
+#### 精确匹配分支
+
+若用户说出了具体主题名称（如"继续学 Python"），跳过扫描直接恢复：
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py get learn-python
+```
+
+解析 stdout JSON，展示进度，确认后从断点继续。
+
+#### 通用扫描分支
+
+否则执行 list 扫描：
+
+```bash
+python3 .opencode/skills/teach-anything/scripts/teach-state.py list
+```
+
+根据结果数量分支：
+
+- **0 条（[]）**：无活跃主题 → 按 Phase 1 流程协商新方案
+- **1 条**：直接解析，展示进度 → "上次学到模块 N「名称」的第 M 步，继续还是先回顾一下？" → 确认后从断点继续
+- **N 条（N > 1）**：列出所有主题让用户选。展示规则：
+  - `completed == true` → "✅ 已学完"
+  - `currentStep == 0` → "尚未开始"
+  - 否则 → "模块 {currentModule}/{totalModules} 第 {currentStep} 步"
+  示例："你有 2 个主题正在学习中：1. Python（模块 3/5 第 4 步） 2. JavaScript ✅ 已学完。想继续学哪个？"
+  用户选择后执行 `get learn-<topic>` 恢复
+  - 若用户选择了已完成（`completed == true`）的主题，不执行 `get`，直接提示"✅ <主题> 已学完！要重学（init --force）还是学新主题？"
 
 **退出码速查**：0=成功, 1=文件不存在, 2=参数不合法, 3=JSON 损坏, 4=检查点已存在（init 拒绝）
 

@@ -6,6 +6,7 @@
 import argparse
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 
@@ -82,6 +83,36 @@ def cmd_get(args):
     print(json.dumps(state, ensure_ascii=False))
 
 
+def cmd_list(args):
+    cwd = Path.cwd()
+    results = []
+    for state_file in sorted(cwd.glob("learn-*/.teaching-state.json")):
+        try:
+            state = json.loads(state_file.read_text())
+            mtime = state_file.stat().st_mtime
+        except (json.JSONDecodeError, OSError):
+            results.append({
+                "topic": "(损坏)",
+                "path": str(state_file),
+                "error": "JSON 解析失败"
+            })
+            continue
+
+        plan = state.get("plan", [])
+        topic = state.get("topic", "") or state_file.parent.name.replace("learn-", "", 1)
+        results.append({
+            "topic": topic,
+            "currentModule": state.get("currentModuleIndex", 0) + 1,
+            "totalModules": len(plan),
+            "currentStep": state.get("currentStep", 0),
+            "completed": all(m.get("completed", False) for m in plan) if plan else False,
+            "updated": datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
+        })
+
+    results.sort(key=lambda r: r.get("updated", ""), reverse=True)
+    print(json.dumps(results, ensure_ascii=False))
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="teach-anything 检查点管理",
@@ -105,6 +136,8 @@ def main():
     p = sub.add_parser("get", help="读取检查点（JSON stdout）")
     p.add_argument("path")
 
+    sub.add_parser("list", help="列出所有活跃主题及进度")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -115,6 +148,8 @@ def main():
         cmd_next(args)
     elif args.command == "get":
         cmd_get(args)
+    elif args.command == "list":
+        cmd_list(args)
 
 
 if __name__ == "__main__":
