@@ -615,7 +615,7 @@ body {
       if (merged[s.topic]) {
         if (!merged[s.topic].domain && s.domain) merged[s.topic].domain = s.domain;
         merged[s.topic].date = s.date;
-        merged[s.topic].errors = s.errors || [];
+        merged[s.topic].errors = (merged[s.topic].errors || []).concat(s.errors || []);
         merged[s.topic].archiveModules = s.modules || [];
       } else {
         merged[s.topic] = {
@@ -718,7 +718,9 @@ body {
         isToday: isToday,
         isYesterday: isYesterday,
         type: type,
-        desc: desc
+        desc: desc,
+        currentModule: d.currentModule || 0,
+        totalModules: d.totalModules || 0
       });
     }
     entries.sort(function (a, b) { return b.dateObj - a.dateObj; });
@@ -913,10 +915,11 @@ body {
         var dotClass = entry.type;
         var statusClass = entry.type === 'done' ? 'done' : 'active';
         var statusText = entry.type === 'done' ? '\u2714 ' + entry.desc : entry.desc;
+        var detailText = entry.totalModules > 0 ? '\u6A21\u5757 ' + entry.currentModule + '/' + entry.totalModules : '';
         html += '<div class="timeline-entry">'
           + '<div class="timeline-dot ' + dotClass + '"></div>'
           + '<span class="timeline-topic">' + entry.topic + '</span>'
-          + '<span class="timeline-detail">-</span>'
+          + (detailText ? '<span class="timeline-detail">' + detailText + '</span>' : '')
           + '<span class="timeline-status ' + statusClass + '">' + statusText + '</span>'
           + '</div>';
       }

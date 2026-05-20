@@ -20,7 +20,7 @@
 
 #### Scenario: List without domain
 - **WHEN** a topic's `.teaching-state.json` does NOT contain a `domain` field
-- **THEN** `list` output for that topic SHALL include `"domain": ""` or omit the field
+- **THEN** `list` output for that topic SHALL include `"domain": "未分类"`
 
 ### Requirement: Agent SHALL infer domain using intent-then-tool priority matching
 The teach-anything Agent SHALL determine the domain using a priority-ordered keyword matching table in SKILL.md.
