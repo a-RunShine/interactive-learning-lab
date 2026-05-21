@@ -17,3 +17,7 @@ Thumbs.db
 *.bak
 images/
 PR/
+testPlans
+
+# 仪表盘预生成数据
+active-topics.json
