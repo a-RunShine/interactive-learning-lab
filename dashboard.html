@@ -614,7 +614,7 @@ body {
       var s = archiveSessions[j];
       if (merged[s.topic]) {
         if (!merged[s.topic].domain && s.domain) merged[s.topic].domain = s.domain;
-        merged[s.topic].date = s.date;
+        if (!merged[s.topic].date || s.date > merged[s.topic].date) merged[s.topic].date = s.date;
         merged[s.topic].errors = (merged[s.topic].errors || []).concat(s.errors || []);
         merged[s.topic].archiveModules = s.modules || [];
       } else {
